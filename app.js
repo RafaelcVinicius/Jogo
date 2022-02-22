@@ -1,113 +1,56 @@
-#app{
-    display: flex;
-    flex-direction: column;
-}
-.painel{
-    margin: 10px;
-    padding: 20px;
-    box-shadow: 0 2px 10px #ccc;
-}
+new Vue({
+    el: '#app',
+    data: {
+        running: false,
+        playerLife: 100,
+        monsterLife: 100,
+        logs: [],
+    },
+    computed: {
+        hasResult(){
+            return this.playerLife == 0 || this.monsterLife == 0 
+        }
+    },
+    methods: {
+        startGame(){
+            this.running = true 
+            this.playerLife = 100
+            this.monsterLife = 100
+            this.logs = []
+        },
+        attack(especial){
+            this.hurt('monsterLife', 7, 12, especial, 'Jogador', 'Monstro', 'player')
+            if(this.monsterLife > 0){
+                this.hurt('playerLife', 7, 12, false, 'Monstro', 'jogador', 'monster')
+            }
+        },
+        hurt(prop, min, max, especial, source, target, cls){
+            const plus = especial ? 5 : 0
+            const hurt = this.getRandom(min + plus, max + plus)
+            this[prop] = Math.max(this[prop] - hurt, 0)
+            this.registerLog( `${source} atingiu ${target} com ${hurt}.`, cls )            
+        },
+        getRandom(min, max){
+            const value = Math.random() * (max - min) + min;
+            return Math.round(value)
+        },
+        healAndHurt(){
+            this.heal(10, 15)
+            this.hurt('playerLife', 7, 12, false, 'Monstro', 'jogador', 'monster')
+        },
+        heal(min, max){
+            const heal = this.getRandom(min, max)
+            this.playerLife = Math.min(this.playerLife + heal, 100)
+            this.registerLog(`Jogador ganhou força de ${heal}.`, 'player')
+        },
+        registerLog(text, cls){
+            this.logs.unshift({ text, cls })
 
-.scores{
-    display: flex;
-}
-.score{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.score h1{
-    font-weight: 300;
-    font-size: 1.6rem;
-}
-.life-bar{
-    width: 80%;
-    height: 20px;
-    border: 1px solid #AAA;
-}
-
-.life-bar .life { 
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    background-color: green;
-}
-.life-bar .life.danger{
-    background-color: red;
-}
-.result{
-    display: flex;
-    border:  none;
-    justify-content: center;
-    font-size: 1.3rem;
-    font-weight: 600;
-}
-.result .win{
-    color: green;
-} 
-.result .lose{ 
-    color: red;
-}
-
-.buttons{
-    display: flex;
-    justify-content: center;
-}
-
-.btn{
-    padding: 5px 10px;
-    margin:  0px 10px;
-    border-radius: 5px;
-    border: none;
-    text-transform: uppercase;
-    font-size: 1.1rem;
-}
-.new-game{
-    background-color: #4253af;
-    color: white;
-}
-.attack{
-background-color: #e51c23;
-color: white;
-}
-.especial-attack{
-    background-color: #ff9800;
-    color: white;
-}
-.heal{
-background-color: #249b24;
-color: white;
-}
-.give-up{
-    background-color: #bbb;
-    color: black;
-}
-
-.logs ul{
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.logs ul li{
-    display: flex;
-    justify-content: center;
-    margin: 4px 0px;
-    padding: 3px 0px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    text-transform:  uppercase;
-    border-radius: 3px;
-}
-
-.player {
-    background-color: #4253afaa;
-    color: white;
-}
-.monster {
- background-color: #e51c23aa;
- color: white;
-}
+        }
+    },
+    watch: {
+        hasResult(value){
+            if(value) this.running = false
+        }
+    }
+})
